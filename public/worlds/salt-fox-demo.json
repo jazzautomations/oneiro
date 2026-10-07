@@ -1,0 +1,96 @@
+{
+  "id": "salt-fox-demo",
+  "title": "Sal, Luz e Raposa",
+  "dreamText": "A cidade engolida por um deserto de sal. Um farol de ferro enferrujado girando uma luz vermelha sem mar. Uma raposa branca do tamanho de um ônibus me seguindo de longe, sem barulho. Um piano de cauda queimado tocando sozinho. Um sino de igreja enorme flutuando a um palmo do chão.",
+  "reading": "A cidade desaparece sob um mar de cristais brancos, enquanto um farol enferrujado lança uma chama vermelha que corta o silêncio. Uma raposa gigante acompanha meus passos, e um piano em chamas ecoa notas que o vento do deserto tenta abraçar.",
+  "rule": "não olhe a raposa nos olhos",
+  "mood": "eerie",
+  "palette": {
+    "bg": "#0b0a0c",
+    "fog": "#17141a",
+    "accents": [
+      "#d9472b",
+      "#e8a24a",
+      "#8a93a8"
+    ]
+  },
+  "elements": [
+    {
+      "id": "salt-el-0",
+      "name": "raposa branca",
+      "prompt": "White fox, sculpted from translucent glass, softly glowing",
+      "meaning": "A raposa gigante que me seguia silenciosa",
+      "modelUrl": "/models/64f031b9-27b9-4c18-9746-d45c57aa20f3.glb",
+      "position": [
+        -3,
+        0,
+        -12
+      ],
+      "scale": 1,
+      "rotation": [
+        0,
+        0.4,
+        0
+      ],
+      "footprint": 5.0
+    },
+    {
+      "id": "salt-el-1",
+      "name": "farol de ferro enferrujado",
+      "prompt": "Rusted iron lighthouse, crafted from weathered iron, softly glowing red light",
+      "meaning": "O farol girando a luz vermelha sobre o deserto de sal",
+      "modelUrl": "/models/4dcb67a8-ceaa-4fdf-99b4-591d04a0d606.glb",
+      "position": [
+        0,
+        0,
+        -19
+      ],
+      "scale": 1,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "footprint": 14.0
+    },
+    {
+      "id": "salt-el-2",
+      "name": "sino de igreja enorme",
+      "prompt": "Enormous church bell, forged from aged bronze, weightless",
+      "meaning": "O sino flutuando a um palmo do chão, balançando devagar",
+      "modelUrl": "/models/f33e5557-70d0-4fc4-9584-fb25f4d504b6.glb",
+      "position": [
+        -6.5,
+        0.3,
+        -9
+      ],
+      "scale": 1,
+      "rotation": [
+        0,
+        0.6,
+        0.05
+      ],
+      "footprint": 4.5
+    },
+    {
+      "id": "salt-el-3",
+      "name": "piano de cauda queimado",
+      "prompt": "Burned grand piano, made of charred wood, slowly melting",
+      "meaning": "O piano queimado que tocava sozinho no sal",
+      "modelUrl": "/models/1e73d258-3a11-461c-8e22-9a48dbb2b6b7.glb",
+      "position": [
+        4,
+        0,
+        -6.5
+      ],
+      "scale": 1,
+      "rotation": [
+        0,
+        -0.7,
+        0
+      ],
+      "footprint": 2.4
+    }
+  ],
+  "createdAt": 1791420000000
+}

@@ -21,10 +21,12 @@ Oneiro is a product, not a demo: dream journal, editable worlds, gift links so y
 - The whole pipeline — speech → interpretation → Tripo → playable vignette — runs in about two minutes.
 
 ## Links
-- Live demo (phone or desktop, WebGL2): https://oneiro.170.9.240.8.sslip.io/dream/ant-city-demo
+- Live demo (phone or desktop, WebGL2): https://oneiro.170.9.240.8.sslip.io/dream/salt-fox-demo  — "Sal, Luz e Raposa": a salt desert swallows the city; a rusted lighthouse, a bus-sized white fox that follows you, a burned grand piano, a church bell floating a palm above the ground. Press **acordar** (wake) when you are done exploring.
+- Second dream: https://oneiro.170.9.240.8.sslip.io/dream/ant-city-demo — "Gigante Formiga na Metrópole"
 - Make your own dream: https://oneiro.170.9.240.8.sslip.io/create
 - Repo: https://github.com/jazzautomations/oneiro
-- Video: submission/oneiro-storyboard.mp4 (storyboard; real-device recording to follow)
+- Video: submission/oneiro-storyboard-salt.mp4 (storyboard of the vignette beats; real-device recording to follow)
+- Hero still: submission/hero-salt-fox.png
 
 ## Stack
 Next.js 16 · react-three-fiber / three · Tripo3D API · Groq (LLM + Whisper) · deployed on an Oracle ARM box (bun + Caddy).

@@ -168,7 +168,7 @@ export async function interpretDream(
   }
 
   // (1) EXTRACT — framing (title/mood/reading/palette) + the dream's concrete things.
-  const extracted = await groqJson(EXTRACT_PROMPT, text, 0.3, 900);
+  const extracted = await groqJson(EXTRACT_PROMPT, text, 0.3, 2600);
   const framing = normalizeFraming(extracted);
   const motifs = asStringArray(extracted.motifs);
   const language =
@@ -204,7 +204,7 @@ async function chooseObjects(
 
   let parsed: Record<string, unknown> | null = null;
   try {
-    parsed = await groqJson(OBJECTS_PROMPT, user, 0.6, 1400);
+    parsed = await groqJson(OBJECTS_PROMPT, user, 0.6, 2600);
   } catch {
     parsed = null;
   }
