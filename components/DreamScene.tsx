@@ -196,10 +196,10 @@ interface VignetteState {
 }
 
 const DEFAULT_RULE = "ela sabe quando você olha";
-/** Sustained direct gaze (s) on the presence that breaks the rule. */
-const GAZE_BREAK_S = 3.2;
 /** The dream ends on its own after this long if you never break the rule. */
-const DREAM_LEN_S = 260;
+// Free exploration: the dream only ends when you choose to wake (button) —
+// this is just a safety net so a forgotten tab still resolves.
+const DREAM_LEN_S = 900;
 /** Procession step period (s): 4 beats marching, 2 held still. */
 const STEP_S = 1.15;
 
@@ -895,8 +895,9 @@ function VignetteDriver({
       if (_fwd.dot(_toCam) > 0.9 && v.presenceDist < footprint * 6 + 20) {
         v.gaze += d;
       }
-      const tooClose = v.presenceDist < footprint * 0.85 + 1.6;
-      if (v.gaze > GAZE_BREAK_S || tooClose || t - v.liveAt > DREAM_LEN_S) {
+      // The dream never ends on its own while you explore; waking is YOUR act
+      // (the "acordar" button → onBreak). Safety timeout only.
+      if (t - v.liveAt > DREAM_LEN_S) {
         v.onBreak();
       }
     } else if (phase === "climax") {
@@ -1149,6 +1150,8 @@ export default function DreamScene({ world, readOnly = false }: DreamSceneProps)
   const [phase, setPhase] = useState<VignettePhase>(
     readOnly ? "cartela" : "live",
   );
+  // "acordar" appears after a little free exploration; pressing it ends the dream.
+  const [canWake, setCanWake] = useState(false);
   const [ruleOn, setRuleOn] = useState(false);
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
@@ -1386,6 +1389,8 @@ export default function DreamScene({ world, readOnly = false }: DreamSceneProps)
         setTimeout(() => setPhase("live"), reduced ? 1600 : 3000),
       );
     } else if (phase === "live") {
+      setCanWake(false);
+      timers.push(setTimeout(() => setCanWake(true), reduced ? 6000 : 15000));
       // liveAt is stamped by the driver on its own clock (state.clock), so the
       // dream-length timer compares like with like.
       // The rule is stated once, early — a single line, then silence.
@@ -1452,10 +1457,23 @@ export default function DreamScene({ world, readOnly = false }: DreamSceneProps)
   const lite = mobile || lowPower;
   // Cap the device-pixel-ratio: full retina is the single biggest GPU cost on
   // phones. Weak hardware renders at 1×, mobile at ≤1.5×, desktop at ≤2×.
-  const dpr = useMemo<[number, number]>(
-    () => (lowPower ? [1, 1] : mobile ? [1, 1.5] : [1, 2]),
-    [lowPower, mobile],
-  );
+  // Retro "dream emulator" render: ~420px-wide internal resolution upscaled
+  // with crisp pixels (PS1 / LSD Dream Emulator). Makes disparate generated
+  // models read as ONE intentional look instead of cheap realism. ?crisp=1 off.
+  const [retro, setRetro] = useState(true);
+  useEffect(() => {
+    try {
+      setRetro(!new URLSearchParams(window.location.search).has("crisp"));
+    } catch {
+      /* keep default */
+    }
+  }, []);
+  const dpr = useMemo<number | [number, number]>(() => {
+    if (retro && typeof window !== "undefined") {
+      return Math.min(1, Math.max(0.22, 420 / window.innerWidth));
+    }
+    return lowPower ? [1, 1] : mobile ? [1, 1.5] : [1, 2];
+  }, [retro, lowPower, mobile]);
   const bg = activePalette?.bg ?? "var(--color-void)";
 
   // No WebGL2 (three r186 has no WebGL1 path) → never mount <Canvas>, which
@@ -1471,6 +1489,7 @@ export default function DreamScene({ world, readOnly = false }: DreamSceneProps)
     >
       {mounted && webgl2 ? (
         <Canvas
+          style={retro ? { imageRendering: "pixelated" } : undefined}
           dpr={dpr}
           gl={{ antialias: !lite, powerPreference: "high-performance", alpha: false }}
           camera={{ position: [0, 1.6, 2], fov: 60, near: 0.1, far: 400 }}
@@ -1564,6 +1583,19 @@ export default function DreamScene({ world, readOnly = false }: DreamSceneProps)
 
       {/* The rule — stated once, early, as a single declarative line. Not a
           tutorial: a taboo. It never repeats and never explains itself. */}
+      {phase === "live" && canWake ? (
+        <button
+          type="button"
+          onClick={() => vigRef.current?.onBreak()}
+          className="pointer-events-auto absolute left-4 z-30 rounded-full border border-hairline px-4 py-2 font-display text-sm italic text-haze/90 transition hover:border-hairline-gold hover:text-neon-gold"
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom) + 1.25rem)",
+            background: "oklch(13% 0.01 296 / 0.55)",
+          }}
+        >
+          acordar
+        </button>
+      ) : null}
       {phase === "live" && ruleOn ? (
         <div className="pointer-events-none absolute inset-x-0 top-[18%] z-10 flex justify-center px-6">
           <p className="font-display text-lg italic leading-snug text-haze/85 sm:text-xl">

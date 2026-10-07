@@ -593,8 +593,23 @@ export default function DreamObject({
     [element.id, onHover],
   );
 
-  const handleClick = useCallback(
-    (e: ThreeEvent<MouseEvent>) => {
+  // iOS Safari never dispatches a DOM `click` on a canvas, so r3f's onClick is
+  // dead on iPhone (walking works there because pointer events DO fire). So we
+  // detect a TAP from pointer events: short (<300ms) and still (<8px). A drag
+  // (look-around) or a hold never counts.
+  const tapRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const handleDown = useCallback((e: ThreeEvent<PointerEvent>) => {
+    const ne = e.nativeEvent;
+    tapRef.current = { x: ne.clientX, y: ne.clientY, t: performance.now() };
+  }, []);
+  const handleUp = useCallback(
+    (e: ThreeEvent<PointerEvent>) => {
+      const t0 = tapRef.current;
+      tapRef.current = null;
+      if (!t0) return;
+      const ne = e.nativeEvent;
+      const moved = Math.abs(ne.clientX - t0.x) + Math.abs(ne.clientY - t0.y);
+      if (moved > 8 || performance.now() - t0.t > 300) return;
       e.stopPropagation();
       playPop(element.id);
       onSelect?.(element.id);
@@ -631,7 +646,8 @@ export default function DreamObject({
         <group rotation={element.rotation} scale={element.scale}>
           <group
             ref={floatRef}
-            onClick={handleClick}
+            onPointerDown={handleDown}
+            onPointerUp={handleUp}
             onPointerOver={handleOver}
             onPointerOut={handleOut}
           >
