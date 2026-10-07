@@ -1,130 +1,63 @@
 // @/app/api/checkout/route.ts
-// POST { packageId, bump } -> create a Stripe Checkout Session for a one-time
-// credit purchase and return { url } for the client to redirect to.
-//
-// Payments degrade gracefully: when STRIPE_SECRET_KEY (or the package's Stripe
-// Price id) is absent the route returns 503 so the build and the app keep
-// running with no Stripe keys set. Keys and price ids are read from env at
-// request time — never hardcoded, never logged.
-//
-// The visitor is identified by the signed `oneiro_vid` cookie (see
-// @/lib/identity) and carried into the session via client_reference_id +
-// metadata; the webhook later links the buyer's email and grants credits.
+// POST { packageId, bump } -> create a Paddle transaction for a one-time credit
+// purchase and return { url } (our /pay page with ?_ptxn=, where Paddle.js opens
+// the checkout). Degrades to 503 when Paddle isn't configured, so the app keeps
+// running without keys. The visitor id rides in custom_data; the webhook grants
+// credits on transaction.completed.
 
-import Stripe from "stripe";
 import { ensureVisitorId } from "@/lib/identity";
 import { getPackage, ORDER_BUMP } from "@/lib/pricing";
+import { paddle } from "@/lib/paddle";
 
 export const runtime = "nodejs";
-// Creates a live Stripe session per request; never cache.
 export const dynamic = "force-dynamic";
 
-interface CheckoutBody {
-  packageId: string;
-  bump: boolean;
-}
-
-function parseBody(value: unknown): CheckoutBody | null {
-  if (!value || typeof value !== "object") return null;
-  const { packageId, bump } = value as Record<string, unknown>;
-  if (typeof packageId !== "string" || !packageId.trim()) return null;
-  return { packageId: packageId.trim(), bump: bump === true };
-}
-
-/** The app's own origin, for success/cancel redirects back into the app. */
 function originOf(request: Request): string {
   return request.headers.get("origin") || new URL(request.url).origin;
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) {
-    return Response.json(
-      { error: "payments not configured" },
-      { status: 503 },
-    );
+  if (!process.env.PADDLE_API_KEY) {
+    return Response.json({ error: "payments not configured" }, { status: 503 });
   }
 
-  let body: CheckoutBody | null;
+  let packageId = "";
+  let bump = false;
   try {
-    body = parseBody(await request.json());
+    const body = (await request.json()) as Record<string, unknown>;
+    packageId = typeof body.packageId === "string" ? body.packageId.trim() : "";
+    bump = body.bump === true;
   } catch {
-    return Response.json(
-      { error: "Invalid JSON body. Expected { packageId, bump }." },
-      { status: 400 },
-    );
-  }
-  if (!body) {
-    return Response.json(
-      { error: "packageId is required." },
-      { status: 400 },
-    );
+    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const pkg = getPackage(body.packageId);
-  if (!pkg) {
-    return Response.json(
-      { error: `Unknown package "${body.packageId}".` },
-      { status: 400 },
-    );
-  }
+  const pkg = getPackage(packageId);
+  if (!pkg) return Response.json({ error: "Unknown package." }, { status: 400 });
 
-  // Resolve Stripe Price ids from env at request time (pricing never reads env).
-  // A missing package price means payments aren't fully configured -> 503.
-  const pkgPriceId = process.env[pkg.stripePriceEnv];
-  if (!pkgPriceId) {
-    return Response.json(
-      { error: "payments not configured" },
-      { status: 503 },
-    );
-  }
+  const pkgPrice = process.env[pkg.priceEnv];
+  if (!pkgPrice) return Response.json({ error: "payments not configured" }, { status: 503 });
 
-  const lineItems: { price: string; quantity: number }[] = [
-    { price: pkgPriceId, quantity: 1 },
-  ];
+  const items = [{ price_id: pkgPrice, quantity: 1 }];
+  const bumpPrice = process.env[ORDER_BUMP.priceEnv];
+  const bumpApplied = bump && !!bumpPrice;
+  if (bumpApplied) items.push({ price_id: bumpPrice as string, quantity: 1 });
 
-  // Order bump is optional: include it only when requested AND its price id is
-  // configured, so a missing bump price never blocks the core purchase.
-  const bumpPriceId = process.env[ORDER_BUMP.stripePriceEnv];
-  const bumpApplied = body.bump && !!bumpPriceId;
-  if (bumpApplied) {
-    lineItems.push({ price: bumpPriceId as string, quantity: 1 });
-  }
-
+  const credits = pkg.credits + (bumpApplied ? ORDER_BUMP.credits : 0);
   const { id: visitorId, isNew, setCookie } = ensureVisitorId(request);
-  const origin = originOf(request);
-
-  const stripe = new Stripe(secretKey);
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: lineItems,
-      metadata: {
-        visitorId,
-        packageId: pkg.id,
-        bump: bumpApplied ? "1" : "0",
-      },
-      client_reference_id: visitorId,
-      success_url: `${origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?checkout=cancel`,
+    const txn = await paddle<{ id: string; checkout?: { url?: string } | null }>("POST", "/transactions", {
+      items,
+      custom_data: { visitorId, packageId: pkg.id, bump: bumpApplied ? "1" : "0", credits: String(credits) },
+      checkout: { url: `${originOf(request)}/pay` },
     });
-
-    if (!session.url) {
-      return Response.json(
-        { error: "Stripe did not return a checkout URL." },
-        { status: 502 },
-      );
-    }
-
-    const res = Response.json({ url: session.url }, { status: 200 });
+    const url = txn.checkout?.url;
+    if (!url) return Response.json({ error: "No checkout URL." }, { status: 502 });
+    const res = Response.json({ url }, { status: 200 });
     if (isNew) res.headers.set("Set-Cookie", setCookie);
     return res;
-  } catch {
-    // Never surface Stripe internals / keys to the client or logs.
-    return Response.json(
-      { error: "Failed to create checkout session." },
-      { status: 502 },
-    );
+  } catch (err) {
+    console.error("[checkout] paddle:", err instanceof Error ? err.message : err);
+    return Response.json({ error: "Failed to create checkout." }, { status: 502 });
   }
 }

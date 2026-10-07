@@ -88,7 +88,7 @@ export default function Paywall({
       if (!res.ok) throw new Error("checkout failed");
       const data = (await res.json()) as CheckoutResponse;
       if (!data.url) throw new Error("no url");
-      // Hand off to Stripe Checkout.
+      // Hand off to Paddle Checkout (our /pay page opens the overlay).
       window.location.href = data.url;
     } catch {
       setError("Não consegui abrir o pagamento agora. Tente de novo.");
