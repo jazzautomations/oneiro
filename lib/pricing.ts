@@ -1,14 +1,14 @@
 // @/lib/pricing.ts
 // The single source of truth for what Oneiro sells. Pure data — NO process.env,
-// NO side effects — so the UI, the checkout route and the Paddle webhook all
+// NO side effects — so the UI, the checkout route and the Stripe webhook all
 // agree on ids, prices and credit amounts by importing from here.
 //
-// Each package carries the NAME of the env var that holds its Paddle price id
+// Each package carries the NAME of the env var that holds its Stripe Payment Link URL
 // (never the id itself); server code resolves process.env[pkg.priceEnv]
-// at request time. Prices are the human-facing truth; scripts/paddle-setup.mjs
-// creates the matching Paddle prices.
+// at request time. Prices are the human-facing truth; the Stripe prices + Payment Links
+// (with the +5 bump as an optional item) were created to match.
 
-/** A one-time credit pack purchasable via Paddle Checkout. */
+/** A one-time credit pack purchasable via a Stripe Payment Link. */
 export interface CreditPackage {
   /** Stable slug used in URLs, checkout and the webhook. */
   id: string;
@@ -20,7 +20,7 @@ export interface CreditPackage {
   priceUsd: number;
   /** Credits granted on purchase. */
   credits: number;
-  /** Name of the env var holding this package's Paddle price id. */
+  /** Name of the env var holding this package's Stripe Payment Link URL. */
   priceEnv: string;
 }
 
@@ -50,7 +50,7 @@ export const PACKAGES: readonly CreditPackage[] = [
     tagline: "A handful of worlds to explore.",
     priceUsd: 7,
     credits: 5,
-    priceEnv: "PADDLE_PRICE_WANDERER",
+    priceEnv: "STRIPE_LINK_WANDERER",
   },
   {
     id: "dreamer",
@@ -58,7 +58,7 @@ export const PACKAGES: readonly CreditPackage[] = [
     tagline: "Dream often. Best value.",
     priceUsd: 15,
     credits: 15,
-    priceEnv: "PADDLE_PRICE_DREAMER",
+    priceEnv: "STRIPE_LINK_DREAMER",
   },
 ] as const;
 
@@ -66,7 +66,7 @@ export const PACKAGES: readonly CreditPackage[] = [
 export const ORDER_BUMP: OrderBump = {
   credits: 5,
   priceUsd: 5,
-  priceEnv: "PADDLE_PRICE_BUMP",
+  priceEnv: "STRIPE_PRICE_BUMP",
   label: "+5 credits for $5",
 } as const;
 

@@ -33,7 +33,8 @@ export default function Paywall({
   onClose: () => void;
 }) {
   const [entered, setEntered] = useState(false);
-  const [bump, setBump] = useState(false);
+  // The +5 add-on is offered on the Stripe checkout page itself (optional item).
+  const bump = false;
   const [credits, setCredits] = useState<number | null>(null);
   // Which package is mid-redirect (disables the grid), or an error line.
   const [pending, setPending] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export default function Paywall({
       if (!res.ok) throw new Error("checkout failed");
       const data = (await res.json()) as CheckoutResponse;
       if (!data.url) throw new Error("no url");
-      // Hand off to Paddle Checkout (our /pay page opens the overlay).
+      // Hand off to the Stripe Payment Link (tagged with this visitor).
       window.location.href = data.url;
     } catch {
       setError("Não consegui abrir o pagamento agora. Tente de novo.");
@@ -196,23 +197,9 @@ export default function Paywall({
           })}
         </div>
 
-        {/* Order bump — a single hairline toggle, folded into whichever pack
-            the dreamer buys. */}
-        <label
-          className={cn(
-            "mt-4 flex cursor-pointer items-center gap-3 rounded-[var(--radius-control)] border p-4 transition-colors",
-            bump ? "border-hairline-gold" : "border-hairline hover:border-mist/40",
-          )}
-        >
-          <input
-            type="checkbox"
-            checked={bump}
-            onChange={(e) => setBump(e.target.checked)}
-            disabled={pending !== null}
-            className="h-4 w-4 accent-[var(--color-neon-gold)]"
-          />
-          <span className="text-sm text-haze">{ORDER_BUMP.label}</span>
-        </label>
+        <p className="mt-4 text-center text-sm text-mist">
+          No pagamento você pode adicionar <span className="text-gold-pale">{ORDER_BUMP.label}</span>.
+        </p>
 
         {error && (
           <p
