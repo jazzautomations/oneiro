@@ -25,7 +25,7 @@ Oneiro is a product, not a demo: dream journal, editable worlds, gift links so y
 - Second dream: https://oneiro.jazzautomations.com.br/dream/ant-city-demo — "Gigante Formiga na Metrópole"
 - Make your own dream: https://oneiro.jazzautomations.com.br/create
 - Repo: https://github.com/jazzautomations/oneiro
-- Video: submission/oneiro-storyboard-salt.mp4 (storyboard of the vignette beats; real-device recording to follow)
+- Video: submission/oneiro-demo-salt.mp4 (30s, real-time capture of the live vignette)
 - Hero still: submission/hero-salt-fox.png
 
 ## Stack
