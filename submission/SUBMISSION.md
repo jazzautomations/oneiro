@@ -23,8 +23,8 @@ Oneiro is a product, not a demo: dream journal, editable worlds, gift links so y
 ## Links
 - Live demo (phone or desktop, WebGL2): https://oneiro.170.9.240.8.sslip.io/dream/ant-city-demo
 - Make your own dream: https://oneiro.170.9.240.8.sslip.io/create
-- Repo: (public GitHub link — pending)
-- Video: (pending)
+- Repo: https://github.com/jazzautomations/oneiro
+- Video: submission/oneiro-storyboard.mp4 (storyboard; real-device recording to follow)
 
 ## Stack
 Next.js 16 · react-three-fiber / three · Tripo3D API · Groq (LLM + Whisper) · deployed on an Oracle ARM box (bun + Caddy).
