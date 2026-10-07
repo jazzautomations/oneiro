@@ -45,3 +45,4 @@ next-env.d.ts
 
 # generated Tripo GLBs (105MB, regeneratable; live on disk + oracle deploy)
 /public/models/
+runs/
