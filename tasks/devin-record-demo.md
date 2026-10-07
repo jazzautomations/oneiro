@@ -7,7 +7,7 @@ Produce a smooth screen recording (mp4, 30fps) of the live Oneiro dream vignette
 You speak/type a dream → AI interprets it → Tripo text-to-3D generates the dream's objects → you walk inside the dream in first person. Each dream plays as a staged vignette (Kurosawa's *Dreams* / *LSD: Dream Emulator*): title card → the dream is "live" (a presence emerges from the fog and approaches) → climax when you stare at it or get too close (it closes in on you, you freeze, sound cuts) → black cut → "morning note" (your dream journal entry).
 
 ## URL
-https://oneiro.170.9.240.8.sslip.io/dream/ant-city-demo
+https://oneiro.jazzautomations.com.br/dream/ant-city-demo
 (Dream: "a giant ant walking through the city, between skyscrapers, people running below." Objects are real Tripo-generated GLBs: amber ant, glass skyscraper, running person.)
 
 ## Controls
