@@ -86,7 +86,12 @@ export async function POST(request: Request): Promise<Response> {
   // which only resolves under Bun (the runtime host) — never in next build's
   // Node page-data workers. A static import would break the build.
   const { tryConsume } = await import("@/lib/ledger");
-  const consumed = tryConsume(visitorId, CREDITS_PER_WORLD);
+  // The free world is capped: global daily budget + one per IP per day, so
+  // clearing cookies / incognito can't drain Tripo credits (see lib/freequota).
+  const { clientIp, canUseFree, recordFree } = await import("@/lib/freequota");
+  const ip = clientIp(request);
+  const consumed = tryConsume(visitorId, CREDITS_PER_WORLD, canUseFree(ip));
+  if (consumed.ok && consumed.usedFree) recordFree(ip);
   if (!consumed.ok) {
     const denied = Response.json({ error: "out_of_credits" }, { status: 402 });
     if (isNew) denied.headers.set("Set-Cookie", setCookie);

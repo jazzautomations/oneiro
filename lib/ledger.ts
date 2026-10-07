@@ -31,6 +31,8 @@ export interface Visitor {
 export interface ConsumeResult {
   ok: boolean;
   remaining: number;
+  /** True when this consume spent the (capped) free world, not credits. */
+  usedFree?: boolean;
 }
 
 type Store = Record<string, Visitor>;
@@ -197,7 +199,11 @@ export function linkEmail(id: string, email: string): boolean {
  * balance covers `n` (decrements). Denied otherwise, and denied (never silently
  * allowed) when the store is unavailable.
  */
-export function tryConsume(id: string, n: number): ConsumeResult {
+export function tryConsume(
+  id: string,
+  n: number,
+  freeAllowed = true,
+): ConsumeResult {
   if (!Number.isFinite(n) || n <= 0) return { ok: false, remaining: 0 };
   const store = load();
   if (!store) return { ok: false, remaining: 0 };
@@ -205,10 +211,10 @@ export function tryConsume(id: string, n: number): ConsumeResult {
     const v = store[id] ?? freshVisitor(id);
     store[id] = v;
 
-    if (v.free_used === 0) {
+    if (v.free_used === 0 && freeAllowed) {
       v.free_used = 1;
       return persist(store)
-        ? { ok: true, remaining: v.credits }
+        ? { ok: true, remaining: v.credits, usedFree: true }
         : { ok: false, remaining: v.credits };
     }
     if (v.credits >= n) {
