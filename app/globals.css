@@ -1,26 +1,333 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ================================================================== *
+ * Oneiro — "Oniric Lacquer"
+ * A cool deep-lacquer void at night; ONE divine ember/gold light is
+ * the only warmth on the chrome. Crystalline violet→cyan iridescence
+ * is reserved ONLY for the dream/generation moment — never on chrome.
+ * Hairlines before shadows. Flat, compact, sharply-bounded panels.
+ * Token + utility NAMES are stable so components inherit the system;
+ * only their VALUES are tuned here. Everything else inherits this.
+ * ================================================================== */
+
+@theme {
+  /* --- Surfaces: deep mineral lacquer, never pure black.
+   *     Low chroma so it reads as refined night, not "purple". --- */
+  --color-void: oklch(13% 0.01 296);         /* page ground */
+  --color-abyss: oklch(16.5% 0.014 296);     /* panels / cards */
+  --color-indigo-deep: oklch(21% 0.02 294);  /* raised chrome */
+  --color-violet-deep: oklch(26% 0.028 296); /* inset / active */
+
+  /* --- Text: neutral-warm, bright for crisp reading --- */
+  --color-haze: oklch(96% 0.01 300);         /* headlines, strong */
+  --color-mist: oklch(78% 0.016 300);        /* body / secondary */
+  --color-whisper: oklch(62% 0.018 300);     /* captions / muted */
+
+  /* --- The one divine accent: ember / gold (the only warm light) --- */
+  --color-ember: oklch(72% 0.17 52);         /* deep warm ember */
+  --color-neon-gold: oklch(84% 0.145 82);    /* molten gold (primary) */
+  --color-gold-pale: oklch(91% 0.07 86);     /* gold hover lift / sheen */
+
+  /* --- Crystalline accents: the DREAM moment only, used sparingly --- */
+  --color-neon-violet: oklch(68% 0.17 300);
+  --color-neon-cyan: oklch(83% 0.115 210);
+  --color-neon-magenta: oklch(70% 0.2 348);
+  --color-neon-rose: oklch(72% 0.15 22);     /* also the error voice */
+
+  /* --- Hairlines (borders before shadows) --- */
+  --color-hairline: oklch(92% 0.02 300 / 0.12);
+  --color-hairline-gold: oklch(84% 0.13 82 / 0.44);
+
+  /* --- Semantic --- */
+  --color-background: var(--color-void);
+  --color-foreground: var(--color-haze);
+  --color-accent: var(--color-neon-gold);
+  --color-accent-strong: var(--color-ember);
+
+  /* --- Fonts (wired from next/font in layout.tsx via *-face vars) --- */
+  --font-display: var(--font-display-face), "Cormorant", Georgia, serif;
+  --font-sans: var(--font-sans-face), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  /* --- Radii: small + deliberate, never bubbly --- */
+  --radius-dream: 0.75rem;   /* panels */
+  --radius-control: 0.5rem;  /* buttons / inputs */
+  --radius-chip: 0.4rem;     /* chips / badges */
+
+  /* --- Gradients ---
+   * dream:  the PRIMARY. ONE warm family (pale→gold→ember). CTAs, mic.
+   * aurora: crystalline, DREAM-MOMENT ONLY (loading, generation, sky).  */
+  --gradient-dream: linear-gradient(140deg,
+    var(--color-gold-pale) 0%, var(--color-neon-gold) 44%, var(--color-ember) 100%);
+  --gradient-aurora: linear-gradient(135deg,
+    var(--color-neon-violet) 0%, var(--color-neon-magenta) 50%, var(--color-neon-cyan) 100%);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ------------------------------------------------------------------ *
+ * Base
+ * ------------------------------------------------------------------ */
+
+html { color-scheme: dark; }
+
+body {
+  background-color: var(--color-void);
+  color: var(--color-haze);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv01";
+  /* One warm ember low on the page + a faint cool-NEUTRAL depth (no violet
+     cast — crystalline hues are the dream moment, never the chrome). */
+  background-image:
+    radial-gradient(60rem 48rem at 50% 120%, oklch(72% 0.17 52 / 0.13), transparent 62%),
+    radial-gradient(50rem 50rem at 88% -10%, oklch(26% 0.01 296 / 0.05), transparent 58%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Faint film grain — the oniric texture, cheap SVG noise. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Weight-inversion defaults: display is thin & airy, body is grounded. */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* ---- Themed browser surfaces (gold = the single chrome accent) ---- */
+::selection { background: var(--color-neon-gold); color: var(--color-void); }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: oklch(from var(--color-neon-gold) l c h / 0.45);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: oklch(from var(--color-neon-gold) l c h / 0.7); }
+* { scrollbar-color: oklch(from var(--color-neon-gold) l c h / 0.45) transparent; scrollbar-width: thin; }
+
+/* System-wide focus ring: gold, never crystalline (that's dream-only).
+ * :where() keeps specificity at 0 so components can refine freely. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-neon-gold);
+  outline-offset: 2px;
+  /* No border-radius override: the outline traces each element's own radius
+     (rounded-full mic, radius-control inputs, etc.) rather than squaring it. */
+}
+
+/* ------------------------------------------------------------------ *
+ * Reusable utilities (names kept stable; values de-slopped)
+ * ------------------------------------------------------------------ */
+
+/* Headline treatment: warm off-white with a single soft gold glow.
+ * No rainbow text-fill. Pairs with the thin display face. */
+@utility glow-text {
+  color: var(--color-haze);
+  text-shadow: 0 0 40px oklch(from var(--color-neon-gold) l c h / 0.26);
+}
+
+/* Gold accent word inside a headline (use on a <span>, sparingly). */
+@utility accent-word {
+  color: var(--color-neon-gold);
+  text-shadow: 0 0 30px oklch(from var(--color-neon-gold) l c h / 0.34);
+}
+
+/* Hairline divider color */
+@utility hairline {
+  border-color: var(--color-hairline);
+}
+
+/* Film grain overlay for the live 3D routes, where the opaque bg-void layer
+ * occludes body::before. Same oniric noise, blended over the scene. */
+@utility dream-grain {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Tabular numerals for counts, progress, timestamps. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Section vertical rhythm. */
+@utility section {
+  padding-block: clamp(3rem, 7vw, 5.5rem);
+}
+
+/* ------------------------------------------------------------------ *
+ * Component vocabulary (flat, hairline-first, one accent per surface)
+ * In @layer components so Tailwind utilities can still override.
+ * ------------------------------------------------------------------ */
+
+@layer components {
+  /* ---- Buttons ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-control);
+    border: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition:
+      filter 160ms ease, transform 160ms ease,
+      color 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Primary = the one warm light. Gold lacquer, dark void ink. */
+  .btn-primary {
+    background-image: var(--gradient-dream);
+    color: var(--color-void);
+    border-color: var(--color-hairline-gold);
+    font-weight: 600;
+    box-shadow:
+      0 1px 0 oklch(98% 0.05 90 / 0.35) inset,
+      0 12px 32px -20px oklch(from var(--color-neon-gold) l c h / 0.7);
+  }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.05); transform: translateY(-1px); }
+  .btn-primary:active:not(:disabled) { filter: brightness(0.97); transform: translateY(0); }
+
+  /* Ghost = hairline chrome; warms to gold on hover. */
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-mist);
+    border-color: var(--color-hairline);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--color-haze);
+    border-color: var(--color-hairline-gold);
+    background: oklch(from var(--color-neon-gold) l c h / 0.05);
+  }
+
+  .btn-sm { padding: 0.5rem 0.875rem; font-size: 0.8125rem; border-radius: var(--radius-chip); }
+  .btn-lg { padding: 0.9rem 1.6rem; font-size: 1rem; }
+
+  /* ---- Icon button (square, hairline, gold on hover) ---- */
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-mist);
+    background: transparent;
+    cursor: pointer;
+    transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  }
+  .icon-btn:hover:not(:disabled) {
+    color: var(--color-haze);
+    border-color: var(--color-hairline-gold);
+    background: oklch(from var(--color-neon-gold) l c h / 0.06);
+  }
+  .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ---- Panel (flat lacquer, hairline, subtle sheen + deep soft drop) ---- */
+  .panel {
+    background: var(--color-abyss);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-dream);
+    box-shadow:
+      0 1px 0 oklch(98% 0.03 90 / 0.03) inset,
+      0 24px 70px -48px oklch(2% 0.01 296 / 0.9);
+  }
+  /* A quieter, inset-feeling surface for nested regions (no card-in-card). */
+  .panel-inset {
+    background: oklch(13% 0.01 296 / 0.6);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-control);
+  }
+
+  /* ---- Chip / badge ---- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-chip);
+    border: 1px solid var(--color-hairline);
+    background: oklch(from var(--color-neon-gold) l c h / 0.04);
+    color: var(--color-mist);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+  .chip-gold {
+    border-color: var(--color-hairline-gold);
+    color: var(--color-gold-pale);
+  }
+
+  /* ---- Input / textarea ---- */
+  .input {
+    width: 100%;
+    background: oklch(13% 0.01 296 / 0.6);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-control);
+    color: var(--color-haze);
+    padding: 0.75rem 0.875rem;
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .input::placeholder { color: var(--color-whisper); }
+  .input:focus,
+  .input:focus-visible {
+    outline: none;
+    border-color: var(--color-hairline-gold);
+    box-shadow: 0 0 0 3px oklch(from var(--color-neon-gold) l c h / 0.16);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ------------------------------------------------------------------ *
+ * Motion (restrained — one authored moment, not scattered jitter)
+ * ------------------------------------------------------------------ */
+
+@keyframes oneiro-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@keyframes oneiro-drift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@utility animate-dream-pulse { animation: oneiro-pulse 3.4s ease-in-out infinite; }
+@utility animate-dream-drift {
+  background-size: 200% 200%;
+  animation: oneiro-drift 14s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-dream-pulse,
+  .animate-dream-drift,
+  .animate-spin {
+    animation: none;
+  }
+  .btn-primary:hover:not(:disabled) { transform: none; }
 }

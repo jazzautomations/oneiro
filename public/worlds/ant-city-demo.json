@@ -1,0 +1,77 @@
+{
+  "id": "ant-city-demo",
+  "title": "Gigante Formiga na Metrópole",
+  "dreamText": "uma formiga gigante andando pela cidade entre os arranha-céus",
+  "reading": "Uma formiga do tamanho de um prédio caminha pela cidade de vidro, e as pessoas correm como fios de luz lá embaixo. O enorme e o miúdo trocam de lugar.",
+  "rule": "ela não gosta de ser olhada",
+  "mood": "surreal",
+  "palette": {
+    "bg": "#0c0805",
+    "fog": "#161009",
+    "accents": [
+      "#f58028",
+      "#e8a24a",
+      "#f6b24a"
+    ]
+  },
+  "elements": [
+    {
+      "id": "ant-el-0",
+      "name": "formiga gigante",
+      "prompt": "giant ant made of polished amber, softly glowing",
+      "meaning": "a formiga que domina a cidade",
+      "modelUrl": "/models/da6d173f-48b7-4276-a317-b148d6d58b40.glb",
+      "position": [
+        -2.5,
+        0,
+        -12
+      ],
+      "scale": 1,
+      "rotation": [
+        0,
+        5.395,
+        0
+      ],
+      "footprint": 6.5
+    },
+    {
+      "id": "ant-el-1",
+      "name": "arranha-céu",
+      "prompt": "skyscraper crafted from translucent glass, weightless",
+      "meaning": "os prédios por onde ela anda",
+      "modelUrl": "/models/e732fdc1-b761-4fe7-a4a3-64c4edf0b785.glb",
+      "position": [
+        8,
+        0,
+        -19
+      ],
+      "scale": 1,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "footprint": 13
+    },
+    {
+      "id": "ant-el-2",
+      "name": "pessoa correndo",
+      "prompt": "human runner sculpted from liquid light, softly glowing",
+      "meaning": "as pessoas correndo embaixo dela",
+      "modelUrl": "/models/c4b58e4b-a7fa-4623-b6e0-2122da9435ab.glb",
+      "position": [
+        2.5,
+        0,
+        -5
+      ],
+      "scale": 1,
+      "rotation": [
+        0.175,
+        5.519,
+        0.088
+      ],
+      "footprint": 1.1
+    }
+  ],
+  "createdAt": 1791330000000
+}
